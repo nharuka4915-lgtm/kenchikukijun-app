@@ -108,9 +108,9 @@
         gap: 15px;
         align-items: center;
     }
-    .btn-incorrect { background-color: #e74c3c; color: white; }
-    .btn-correct { background-color: #2ecc71; color: white; }
+    .btn-prev { background-color: #95a5a6; color: white; }
     .btn-next { background-color: #3498db; color: white; }
+    .btn-correct { background-color: #2ecc71; color: white; }
     .btn-start { background-color: #3498db; color: white; font-size: 18px; padding: 12px 30px; }
     
     .instruction { 
@@ -147,7 +147,7 @@
 </head>
 <body>
 <div class="instruction">
-    <p>💡 黒塗り部分をタップして答えを確認しよう！</p>
+    <p>💡 黒塗り部分をタップして答えを確認し、すべて開いたら「次の問題へ」を押そう！（前の問題に戻ることもできます）</p>
 </div>
 
 <div class="container" id="app-container">
@@ -171,7 +171,7 @@
             category: "単体規定",
             subcategory: "① 主要構造部",
             title: "主要構造部・防火構造等",
-            headers: `<tr><th style="width: 40%;">対象の建築物 (D)</th><th style="width: 60%;">適合すべき基準 (E)</th></tr>`,
+            headers: `<tr><th style="width: 40%;">対象の建築物 </th><th style="width: 60%;">適合すべき基準</th></tr>`,
             rows: [
                 `<tr>
                     <td class="col-d">
@@ -205,7 +205,7 @@
             category: "単体規定",
             subcategory: "② 防火・避難",
             title: "防火・避難に関する基準",
-            headers: `<tr><th style="width: 40%;">対象の建築物 (D)</th><th style="width: 60%;">適合すべき基準 (E)</th></tr>`,
+            headers: `<tr><th style="width: 40%;">対象の建築物</th><th style="width: 60%;">適合すべき基準</th></tr>`,
             rows: [
                 `<tr>
                     <td class="col-d">
@@ -234,7 +234,7 @@
             category: "単体規定",
             subcategory: "衛生",
             title: "居室の採光・換気・防湿等に関する基準",
-            headers: `<tr><th style="width: 40%;">対象の建築物 (D)</th><th style="width: 60%;">適合すべき基準 (E)</th></tr>`,
+            headers: `<tr><th style="width: 40%;">対象の建築物 </th><th style="width: 60%;">適合すべき基準 </th></tr>`,
             rows: [
                 `<tr>
                     <td class="col-d">
@@ -357,7 +357,7 @@
             category: "集団規定",
             subcategory: "建蔽率①",
             title: "建蔽率の緩和に関する基準①",
-            headers: `<tr><th style="width: 30%;">適合すべき基準 (C)</th><th style="width: 50%;">対象の建築物 (D)</th><th style="width: 20%;">特定行政庁の許可 (F)</th></tr>`,
+            headers: `<tr><th style="width: 30%;">適合すべき基準 </th><th style="width: 50%;">対象の建築物 </th><th style="width: 20%;">特定行政庁の許可 (F)</th></tr>`,
             rows: [
                 `<tr>
                     <td style="background: #fff; font-weight: bold;">
@@ -398,7 +398,7 @@
             category: "集団規定",
             subcategory: "建蔽率②",
             title: "建蔽率の緩和に関する基準②",
-            headers: `<tr><th style="width: 30%;">適合すべき基準 (C)</th><th style="width: 50%;">対象の建築物 (D)</th><th style="width: 20%;">特定行政庁の許可 (F)</th></tr>`,
+            headers: `<tr><th style="width: 30%;">適合すべき基準 (C)</th><th style="width: 50%;">対象の建築物 </th><th style="width: 20%;">特定行政庁の許可 </th></tr>`,
             rows: [
                 `<tr>
                     <td style="background: #fff; font-weight: bold;">
@@ -432,7 +432,7 @@
             category: "集団規定",
             subcategory: "建蔽率③",
             title: "建蔽率の緩和に関する基準③",
-            headers: `<tr><th style="width: 30%;">適合すべき基準 (C)</th><th style="width: 50%;">対象の建築物 (D)</th><th style="width: 20%;">特定行政庁の許可 (F)</th></tr>`,
+            headers: `<tr><th style="width: 30%;">適合すべき基準 (C)</th><th style="width: 50%;">対象の建築物 </th><th style="width: 20%;">特定行政庁の許可 </th></tr>`,
             rows: [
                 `<tr>
                     <td style="background: #fff; font-weight: bold;">
@@ -474,7 +474,7 @@
             category: "集団規定",
             subcategory: "容積率①",
             title: "容積率の制限に関する基準①",
-            headers: `<tr><th style="width: 40%;">原則 (D)</th><th style="width: 60%;">例外 (E)</th></tr>`,
+            headers: `<tr><th style="width: 40%;">原則 </th><th style="width: 60%;">例外 </th></tr>`,
             rows: [
                 `<tr>
                     <td class="col-d">
@@ -494,7 +494,7 @@
             category: "集団規定",
             subcategory: "容積率②",
             title: "容積率の制限に関する基準②",
-            headers: `<tr><th style="width: 40%;">対象の建築物 (D)</th><th style="width: 45%;">適合すべき基準 (E)</th><th style="width: 15%;">特定行政庁の許可 (F)</th></tr>`,
+            headers: `<tr><th style="width: 40%;">対象の建築物 </th><th style="width: 45%;">適合すべき基準</th><th style="width: 15%;">特定行政庁の許可 (F)</th></tr>`,
             rows: [
                 `<tr>
                     <td class="col-d" style="font-size: 0.9em;">
@@ -513,7 +513,7 @@
             category: "集団規定",
             subcategory: "容積率③",
             title: "容積率の制限に関する基準③",
-            headers: `<tr><th style="width: 45%;">対象の建築物 (D)</th><th style="width: 40%;">適合すべき基準 (E)</th><th style="width: 15%;">特定行政庁の許可 (F)</th></tr>`,
+            headers: `<tr><th style="width: 45%;">対象の建築物 </th><th style="width: 40%;">適合すべき基準 </th><th style="width: 15%;">特定行政庁の許可 </th></tr>`,
             rows: [
                 `<tr>
                     <td class="col-d" style="font-size: 0.85em;">
@@ -548,7 +548,7 @@
             category: "集団規定",
             subcategory: "容積率④",
             title: "容積率の緩和等に関する基準",
-            headers: `<tr><th style="width: 45%;">対象の建築物 (D)</th><th style="width: 40%;">適合すべき基準 (E)</th><th style="width: 15%;">特定行政庁の許可 (F)</th></tr>`,
+            headers: `<tr><th style="width: 45%;">対象の建築物 </th><th style="width: 40%;">適合すべき基準 </th><th style="width: 15%;">特定行政庁の許可 </th></tr>`,
             rows: [
                 `<tr>
                     <td class="col-d" style="font-size: 0.85em;">
@@ -583,7 +583,7 @@
             category: "集団規定",
             subcategory: "敷地面積の最低限度",
             title: "敷地面積の最低限度に関する基準",
-            headers: `<tr><th style="width: 40%;">内容 (D)</th><th style="width: 60%;">例外・制限 (E)</th></tr>`,
+            headers: `<tr><th style="width: 40%;">内容 </th><th style="width: 60%;">例外・制限 </th></tr>`,
             rows: [
                 `<tr>
                     <td class="col-d" style="font-size: 0.9em;">
@@ -608,7 +608,7 @@
             category: "集団規定",
             subcategory: "防火地域・準防火地域",
             title: "防火地域・準防火地域に関する制限",
-            headers: `<tr><th style="width: 40%;">対象・項目 (D)</th><th style="width: 60%;">基準・内容 (E)</th></tr>`,
+            headers: `<tr><th style="width: 40%;">対象・項目 </th><th style="width: 60%;">基準・内容</th></tr>`,
             rows: [
                 `<tr>
                     <td class="col-d" style="font-size: 0.9em;">
@@ -661,7 +661,8 @@
             ...q,
             rows: [...q.rows],
             revealedIndices: new Set(),
-            autoRevealedIndices: new Set()
+            autoRevealedIndices: new Set(),
+            isJudgedIncorrect: false
         }));
 
         if (selectedMode === 'random') {
@@ -693,8 +694,7 @@
             </table>
             <div style="padding: 20px; background: #fafafa; border-top: 1px solid #ddd; text-align: center;">
                 <div class="button-container" id="action-buttons">
-                    <button class="btn btn-incorrect" onclick="judge(false)">不正解</button>
-                    <button class="btn btn-correct" onclick="judge(true)">正解</button>
+                    <!-- 動的にボタンが挿入されます -->
                 </div>
                 <div id="overall-result" style="margin-top: 10px; font-weight: bold; font-size: 14px;"></div>
             </div>
@@ -733,12 +733,16 @@
 
         document.getElementById('overall-result').textContent = '';
         
-        // ★修正点：問題を読み込むときは必ず「正解」「不正解」ボタンの状態にリセットする
-        document.getElementById('action-buttons').innerHTML = `
-            <button class="btn btn-incorrect" onclick="judge(false)">不正解</button>
-            <button class="btn btn-correct" onclick="judge(true)">正解</button>
-        `;
-        document.getElementById('action-buttons').style.display = 'flex';
+        // ボタンの構築（1問目は「前の問題へ」を表示しない、または無効化するなど）
+        let buttonsHtml = '';
+        if (currentIndex > 0) {
+            buttonsHtml += `<button class="btn btn-prev" onclick="goToPrevQuestion()">◀ 前の問題へ</button>`;
+        }
+        buttonsHtml += `<button class="btn btn-next" onclick="checkAndNext()">次の問題へ ➔</button>`;
+
+        const actionContainer = document.getElementById('action-buttons');
+        actionContainer.innerHTML = buttonsHtml;
+        actionContainer.style.display = 'flex';
     }
 
     function reveal(element, index) {
@@ -755,24 +759,40 @@
         }
     }
 
-    function judge(isCorrect) {
-        const resultElem = document.getElementById('overall-result');
+    function checkAndNext() {
         const currentQ = questions[currentIndex];
         const hiddenElements = document.querySelectorAll('#table-body .hidden-text');
-        
-        if (isCorrect) {
+        const resultElem = document.getElementById('overall-result');
+
+        // すでに不正解扱いで答えが全開になっている状態でボタンが押された場合は次の問題へ
+        if (currentQ.isJudgedIncorrect) {
+            moveToNextQuestion();
+            return;
+        }
+
+        // すべての黒塗りが開いているかチェック
+        let allRevealed = true;
+        hiddenElements.forEach(el => {
+            if (!el.classList.contains('revealed')) {
+                allRevealed = false;
+            }
+        });
+
+        if (allRevealed) {
+            // 正解！
             correctScore++;
             document.getElementById('correct-count').textContent = correctScore;
             resultElem.style.color = '#2ecc71';
             resultElem.textContent = '正解！次の問題に進みます...';
             
             document.getElementById('action-buttons').style.display = 'none';
-            setTimeout(nextStep, 1000);
+            setTimeout(moveToNextQuestion, 800);
         } else {
+            // 不正解（開いていないところがある）
             resultElem.style.color = '#e74c3c';
-            resultElem.textContent = '不正解。答えを確認して、見直したら「次の問題へ」を押してください。';
+            resultElem.textContent = 'すべて開いていないため「不正解」となります。答えを確認して、もう一度「次の問題へ」を押してください。';
             
-            // 不正解のとき：まだ開いていないところをすべて自動で開く
+            // まだ開いていないところをすべて自動で開く
             hiddenElements.forEach((el, index) => {
                 if (!el.classList.contains('revealed')) {
                     el.classList.add('revealed', 'auto-revealed');
@@ -785,14 +805,18 @@
                 incorrectQuestions.push(currentQ);
             }
 
-            // ボタンを「次の問題へ」に切り替える
-            document.getElementById('action-buttons').innerHTML = `
-                <button class="btn btn-next" onclick="nextStep()">次の問題へ ➔</button>
-            `;
+            currentQ.isJudgedIncorrect = true;
         }
     }
 
-    function nextStep() {
+    function goToPrevQuestion() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            loadQuestion();
+        }
+    }
+
+    function moveToNextQuestion() {
         currentIndex++;
         if (currentIndex < questions.length) {
             loadQuestion();
@@ -824,7 +848,12 @@
 
     function startReviewMode() {
         renderQuizContainer();
-        questions = shuffleArray(incorrectQuestions);
+        questions = shuffleArray(incorrectQuestions).map(q => ({
+            ...q,
+            revealedIndices: new Set(),
+            autoRevealedIndices: new Set(),
+            isJudgedIncorrect: false
+        }));
         incorrectQuestions = [];
         currentIndex = 0;
         isReviewMode = true;
