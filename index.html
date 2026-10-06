@@ -850,7 +850,8 @@
         renderQuizContainer();
         questions = shuffleArray(incorrectQuestions).map(q => ({
             ...q,
-            revealedIndices: new Set(),
+            // 最初に自分で開けた部分はそのまま引き継ぎ、自動で開かされた部分（autoRevealedIndices）だけをリセットする
+            revealedIndices: new Set([...q.revealedIndices].filter(idx => !q.autoRevealedIndices.has(idx))),
             autoRevealedIndices: new Set(),
             isJudgedIncorrect: false
         }));
