@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宅建・暗記アプリ</title>
+<style>
+    body { 
+        font-family: 'Hiragino Sans', 'Meiryo', sans-serif; 
+        background-color: #f4f7f6; 
+        color: #333; 
+        padding: 20px; 
+        line-height: 1.6;
+    }
+    .container { 
+        max-width: 950px; 
+        margin: 0 auto; 
+        background: #fff; 
+        border-radius: 8px; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        overflow: hidden; 
+    }
+    .header { 
+        display: flex; 
+        align-items: center;
+        flex-wrap: wrap;
+        background: #2c3e50; 
+        color: #fff; 
+        padding: 15px 20px; 
+        gap: 10px;
+    }
+    .header h2 { margin: 0; font-size: 18px; font-weight: normal; flex-grow: 1; }
+    .badge-category { 
+        background: #3498db; 
+        padding: 6px 12px; 
+        border-radius: 4px; 
+        font-size: 14px; 
+        font-weight: bold;
+    }
+    .badge-subcategory { 
+        background: #e67e22; 
+        padding: 6px 12px; 
+        border-radius: 4px; 
+        font-size: 14px; 
+        font-weight: bold;
+    }
+    .score-board {
+        font-size: 14px;
+        background: rgba(255,255,255,0.1);
+        padding: 6px 12px;
+        border-radius: 4px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 15px;
+        vertical-align: top;
+    }
+    th {
+        background: #ecf0f1;
+        text-align: center;
+        font-weight: bold;
+        color: #333;
+    }
+    .item-group {
+        margin-bottom: 12px;
+    }
+    .item-group:last-child {
+        margin-bottom: 0;
+    }
+    .hidden-text { 
+        background-color: #2c3e50; 
+        color: #2c3e50; 
+        cursor: pointer; 
+        border-radius: 4px; 
+        padding: 2px 6px; 
+        user-select: none; 
+        transition: all 0.2s; 
+        font-weight: bold;
+        display: inline-block;
+    }
+    .hidden-text.revealed { 
+        background-color: #ffe6e6; 
+        color: #e74c3c; 
+    }
+    .hidden-text.auto-revealed {
+        background-color: #e8f8f5;
+        color: #16a085;
+        border: 1px dashed #1abc9c;
+    }
+    .btn {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 16px;
+        transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.8; }
+    .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        align-items: center;
+    }
+    .btn-incorrect { background-color: #e74c3c; color: white; }
+    .btn-correct { background-color: #2ecc71; color: white; }
+    .btn-next { background-color: #3498db; color: white; }
+    .btn-start { background-color: #3498db; color: white; font-size: 18px; padding: 12px 30px; }
+    
+    .instruction { 
+        text-align: center; 
+        margin-bottom: 20px; 
+        color: #666; 
+        font-size: 0.95em;
+    }
+    .mode-select-box {
+        padding: 50px 20px;
+        text-align: center;
+    }
+    .mode-select-box h1 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+    }
+    .mode-select-box p {
+        color: #666;
+        margin-bottom: 30px;
+    }
+    .radio-group {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-bottom: 30px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .radio-group label {
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+<div class="instruction">
+    <p>💡 黒塗り部分をタップして答えを確認しよう！</p>
+</div>
+
+<div class="container" id="app-container">
+    <!-- 初期状態：モード選択画面 -->
+    <div class="mode-select-box">
+        <h1>宅建・暗記トレーニング</h1>
+        <p>出題方法を選んで「スタート」を押してください。</p>
+        
+        <div class="radio-group">
+            <label><input type="radio" name="playMode" value="normal" checked> 順番通り</label>
+            <label><input type="radio" name="playMode" value="random"> ランダム</label>
+        </div>
+        
+        <button class="btn btn-start" onclick="startApp()">スタート！</button>
+    </div>
+</div>
+
+<script>
+    const rawQuestions = [
+        {
+            category: "単体規定",
+            subcategory: "① 主要構造部",
+            title: "主要構造部・防火構造等",
+            headers: `<tr><th style="width: 40%;">対象の建築物 (D)</th><th style="width: 60%;">適合すべき基準 (E)</th></tr>`,
+            rows: [
+                `<tr>
+                    <td class="col-d">
+                        <div class="item-group">① 4階建て以上（地階を<span class="hidden-text" onclick="reveal(this)">除く</span>）</div>
+                        <div class="item-group">② 高さが<span class="hidden-text" onclick="reveal(this)">16m超</span></div>
+                        <div class="item-group">③ 倉庫・自動車車庫等で高さが<span class="hidden-text" onclick="reveal(this)">13m超</span></div>
+                    </td>
+                    <td class="col-e">
+                        <div class="item-group">特定主要構造部を通常火災終了時間が経過するまでの間、その火災による倒壊・延焼を防止するための一定の技術的基準に適合し、国土交通大臣が定めた構造方法を用いるもの等とする</div>
+                        <div class="item-group" style="margin-top: 10px;">
+                            ただし、その周囲に一定の基準に適合した延焼防止上有効な<span class="hidden-text" onclick="reveal(this)">空き地</span>がある場合は除く
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-d">
+                        延べ面積が<span class="hidden-text" onclick="reveal(this)">3,000㎡超</span>の建築物
+                    </td>
+                    <td class="col-e">
+                        <span class="hidden-text" onclick="reveal(this)">壁</span>、<span class="hidden-text" onclick="reveal(this)">柱</span>、<span class="hidden-text" onclick="reveal(this)">床</span>その他の建築物の部分、または<span class="hidden-text" onclick="reveal(this)">防火戸</span>その他の政令で定める<span class="hidden-text" onclick="reveal(this)">防火設備</span>を、通常の火災時における火熱が当該建築物の周囲に防火上有害な影響を及ぼすことを防止するための一定の技術的基準に適合し、国土交通大臣が定めた構造方法を用いるもの等とする
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="background: #fdfefe; font-size: 0.95em; color: #555;">
+                        ※これらの基準の適用上、一の建築物であっても、<span class="hidden-text" onclick="reveal(this)">火熱遮断壁</span>等で区画すれば、それぞれ別の建築物とみなされる
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "単体規定",
+            subcategory: "② 防火・避難",
+            title: "防火・避難に関する基準",
+            headers: `<tr><th style="width: 40%;">対象の建築物 (D)</th><th style="width: 60%;">適合すべき基準 (E)</th></tr>`,
+            rows: [
+                `<tr>
+                    <td class="col-d">
+                        延べ面積が<span class="hidden-text" onclick="reveal(this)">1,000㎡超</span>の<span class="hidden-text" onclick="reveal(this)">木造</span>建築物等
+                    </td>
+                    <td class="col-e">
+                        <span class="hidden-text" onclick="reveal(this)">外壁</span>、<span class="hidden-text" onclick="reveal(this)">軒裏</span>で延焼のおそれがある部分を<span class="hidden-text" onclick="reveal(this)">防火構造</span>とし、<span class="hidden-text" onclick="reveal(this)">屋根</span>の構造を火災に関する性能について一定の技術的基準に適合するもの<br>
+                        で、<span class="hidden-text" onclick="reveal(this)">国土交通大臣</span>の認定を受けたもの等にしなければならない
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-d">
+                        延べ面積が<span class="hidden-text" onclick="reveal(this)">1,000㎡超</span>の建築物<br>（耐火建築物・準耐火建築物を除く）
+                    </td>
+                    <td class="col-e">
+                        防火上、有効な構造の<span class="hidden-text" onclick="reveal(this)">防火壁</span>・<span class="hidden-text" onclick="reveal(this)">防火床</span>によって有効に区画し、各床面積の合計をそれぞれ<span class="hidden-text" onclick="reveal(this)">1,000㎡</span>以内にしなければならない<br>
+                        ただし、<br>
+                        防火上有効な構造の防火壁または防火床によって他の部分と有効に区画されている部分（特定部分）を有する建築物であって、当該建築物の特定部分が次のいずれかに該当し、かつ、当該特定部分の<span class="hidden-text" onclick="reveal(this)">外壁の開口部</span>で延焼のおそれのある部分に防火設備を有するものについては、該建築物の特定部分と他の部分をそれぞれ別の建築物とみなし、かつ、当該特定部分を<span class="hidden-text" onclick="reveal(this)">耐火建築物</span>または<span class="hidden-text" onclick="reveal(this)">準耐火建築物</span>とみなす<br>
+                        ①当該特定部分の<span class="hidden-text" onclick="reveal(this)">特定主要構造部</span>が<span class="hidden-text" onclick="reveal(this)">耐火構造</span>であるもの等<br>
+                        ②当該特定部分の<span class="hidden-text" onclick="reveal(this)">主要構造部</span>が<span class="hidden-text" onclick="reveal(this)">準耐火構造</span>であるもの等
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "単体規定",
+            subcategory: "衛生",
+            title: "居室の採光・換気・防湿等に関する基準",
+            headers: `<tr><th style="width: 40%;">対象の建築物 (D)</th><th style="width: 60%;">適合すべき基準 (E)</th></tr>`,
+            rows: [
+                `<tr>
+                    <td class="col-d">
+                        <span class="hidden-text" onclick="reveal(this)">住宅の居</span>室
+                    </td>
+                    <td class="col-e">
+                        採光に有効な部分の面積 ＝ 居室の床面積 × <span class="hidden-text" onclick="reveal(this)">1/7</span>以上
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-d">
+                        <span class="hidden-text" onclick="reveal(this)">学校の教</span>室、<span class="hidden-text" onclick="reveal(this)">病院の病</span>室など
+                    </td>
+                    <td class="col-e">
+                        採光に有効な部分の面積 ＝ 居室の床面積 × 一定割合 （<span class="hidden-text" onclick="reveal(this)">1/5</span>～<span class="hidden-text" onclick="reveal(this)">1/10</span>） 以上
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="background: #fdfefe; font-size: 0.95em; color: #555;">
+                        ※住宅の居室、割合が1/5や1/7とされた居室に関しては、<span class="hidden-text" onclick="reveal(this)">国土交通大臣</span>が定める基準に従い、<span class="hidden-text" onclick="reveal(this)">照明設備</span>の設置、<span class="hidden-text" onclick="reveal(this)">有効な採光方法の確保</span>その他これらに準ずる措置が講じられていれば、それぞれ<span class="hidden-text" onclick="reveal(this)">1/10</span>までの範囲内において<span class="hidden-text" onclick="reveal(this)">国土交通大臣</span>が別に定める割合となる
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-d">
+                        住宅の居室、学校の教室、病院の病室など
+                    </td>
+                    <td class="col-e">
+                        <span class="hidden-text" onclick="reveal(this)">地階</span>に設けるものは<span class="hidden-text" onclick="reveal(this)">壁</span>および<span class="hidden-text" onclick="reveal(this)">床</span>の<span class="hidden-text" onclick="reveal(this)">防湿</span>の措置その他の事項において衛生上必要な政令で定める技術的基準に適合するものでなければならない
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "集団規定",
+            subcategory: "適用範囲",
+            title: "集団規定の適用範囲",
+            headers: `<tr><th style="width: 40%;">原則</th><th style="width: 60%;">例外</th></tr>`,
+            rows: [
+                `<tr>
+                    <td class="col-d">
+                        <span class="hidden-text" onclick="reveal(this)">都市計画区域</span>および<span class="hidden-text" onclick="reveal(this)">準都市計画区域</span><b>内</b>
+                    </td>
+                    <td class="col-e">
+                        <span class="hidden-text" onclick="reveal(this)">都市計画区域</span>および<span class="hidden-text" onclick="reveal(this)">準都市計画区域</span><b>外</b>であっても、<span class="hidden-text" onclick="reveal(this)">都道府県知事</span>が関係市町村の意見を聴いて指定する区域内においては、地方公共団体は、条例で、一定の事項（<span class="hidden-text" onclick="reveal(this)">道路</span>に関する制限、<span class="hidden-text" onclick="reveal(this)">建蔽率</span>、<span class="hidden-text" onclick="reveal(this)">容積率</span>、<span class="hidden-text" onclick="reveal(this)">建築物の高さ</span>、<span class="hidden-text" onclick="reveal(this)">斜線制限</span>、<span class="hidden-text" onclick="reveal(this)">日影規制</span>）について、必要な制限を定めることができる
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "集団規定",
+            subcategory: "道路",
+            title: "道路の幅員に関する基準",
+            headers: `<tr><th style="width: 40%;">原則</th><th style="width: 60%;">例外</th></tr>`,
+            rows: [
+                `<tr>
+                    <td class="col-d">
+                        幅員<span class="hidden-text" onclick="reveal(this)">4m以上</span>
+                    </td>
+                    <td class="col-e">
+                        ☆<span class="hidden-text" onclick="reveal(this)">特定行政庁</span>が地方の気候、風土の特殊性等により、必要と認めて<span class="hidden-text" onclick="reveal(this)">都道府県都市計画審議会の議</span>を経て指定する区域内では幅員<span class="hidden-text" onclick="reveal(this)">6m以上</span><br>
+                        ☆都市計画区域・準都市計画区域の指定や条例の制定等により、集団規定が適用されることとなった時、すでに存在し、現に建築物が立ち並んでいる幅員が4m未満の道で、特定行政庁が指定したもの
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "集団規定",
+            subcategory: "接道義務",
+            title: "接道義務に関する基準",
+            headers: `<tr><th style="width: 40%;">原則</th><th style="width: 60%;">例外</th></tr>`,
+            rows: [
+                `<tr>
+                    <td class="col-d">
+                        建築物の敷地は建築基準法上の道路に<span class="hidden-text" onclick="reveal(this)">2m以上</span>接していなければならない
+                    </td>
+                    <td class="col-e">
+                        ☆4m以上の道に<span class="hidden-text" onclick="reveal(this)">2m以上</span>接する建築物のうち、利用者が少数であるものとして、用途および規模に関して（国土交通省令に適合するもので）、<span class="hidden-text" onclick="reveal(this)">特定行政庁</span>が認めるものは道路に2m以上接していなくてもよい<br>
+                        ☆周囲に<span class="hidden-text" onclick="reveal(this)">広い空き地</span>がある場合等で、<span class="hidden-text" onclick="reveal(this)">特定行政庁</span>が、<span class="hidden-text" onclick="reveal(this)">建築審査会</span>の同意を得て許可したものについては、道路に2m以上接していなくてもよい<br>
+                        ☆<span class="hidden-text" onclick="reveal(this)">自動車</span>専用道路等は除く<br>
+                        ☆<span class="hidden-text" onclick="reveal(this)">地方公共団体</span>は、特殊建築物や<span class="hidden-text" onclick="reveal(this)">3階</span>以上的建築物、延べ面積が<span class="hidden-text" onclick="reveal(this)">1,000㎡超</span>の建築物、敷地が袋路状道路のみに接する延べ面積が<span class="hidden-text" onclick="reveal(this)">150㎡超</span>の建築物、一戸建て住宅を<span class="hidden-text" onclick="reveal(this)">除く</span>などについて、条例で必要な接道義務の制限を付加することができる
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "集団規定",
+            subcategory: "道路内の建築制限",
+            title: "道路内の建築制限に関する基準",
+            headers: `<tr><th style="width: 40%;">原則</th><th style="width: 60%;">例外</th></tr>`,
+            rows: [
+                `<tr>
+                    <td class="col-d">
+                        道路内に、建築物や敷地を造成するための<span class="hidden-text" onclick="reveal(this)">擁壁</span>を建築してはならない
+                    </td>
+                    <td class="col-e">
+                        ①地盤面下に設ける建築物（地下商店街など）<br>
+                        ②公衆便所、巡査派出所など公益上必要な建築物で、<span class="hidden-text" onclick="reveal(this)">特定行政庁</span>が通行上支障がないと認めて<span class="hidden-text" onclick="reveal(this)">建築審査会</span>の同意を得て許可したもの<br>
+                        ③<span class="hidden-text" onclick="reveal(this)">公共用歩廊</span>（アーケード街）などで、<span class="hidden-text" onclick="reveal(this)">特定行政庁</span>があらかじめ<span class="hidden-text" onclick="reveal(this)">建築審査会</span>の同意を得て、安全上、防火上、衛生上他の建築物の利便を妨げ、その他周囲の環境を害するおがないと認めて許可したもの
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "集団規定",
+            subcategory: "壁面線",
+            title: "壁面線の指定に関する基準",
+            headers: `<tr><th style="width: 40%;">内容</th><th style="width: 60%;">詳細・補足</th></tr>`,
+            rows: [
+                `<tr>
+                    <td class="col-d">
+                        壁面線の指定
+                    </td>
+                    <td class="col-e">
+                        <span class="hidden-text" onclick="reveal(this)">特定行政庁</span>は、必要があると認める場合には、<span class="hidden-text" onclick="reveal(this)">建築審査会</span>の同意を得て、壁面線を指定することができます。
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "集団規定",
+            subcategory: "建蔽率①",
+            title: "建蔽率の緩和に関する基準①",
+            headers: `<tr><th style="width: 30%;">適合すべき基準 (C)</th><th style="width: 50%;">対象の建築物 (D)</th><th style="width: 20%;">特定行政庁の許可 (F)</th></tr>`,
+            rows: [
+                `<tr>
+                    <td style="background: #fff; font-weight: bold;">
+                        100%で建築可能
+                    </td>
+                    <td style="background: #fff;">
+                        ☆ 建蔽率の最高限度が8/10とされている地域内でかつ防火地域内にある耐火建築物等
+                    </td>
+                    <td style="background: #fff; text-align: center;">
+                        <span class="hidden-text" onclick="reveal(this)">不要</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background: #fff; font-weight: bold;">
+                        100%で建築可能
+                    </td>
+                    <td style="background: #fff;">
+                        ☆ 巡査派出所、公衆便所、公共用歩廊
+                    </td>
+                    <td style="background: #fff; text-align: center;">
+                        <span class="hidden-text" onclick="reveal(this)">不要</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background: #fff; font-weight: bold;">
+                        100%で建築可能
+                    </td>
+                    <td style="background: #fff;">
+                        ☆ 公園、広場、道路、川などの内にある建築物
+                    </td>
+                    <td style="background: #fff; text-align: center;">
+                        <span class="hidden-text" onclick="reveal(this)">必要</span>
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "集団規定",
+            subcategory: "建蔽率②",
+            title: "建蔽率の緩和に関する基準②",
+            headers: `<tr><th style="width: 30%;">適合すべき基準 (C)</th><th style="width: 50%;">対象の建築物 (D)</th><th style="width: 20%;">特定行政庁の許可 (F)</th></tr>`,
+            rows: [
+                `<tr>
+                    <td style="background: #fff; font-weight: bold;">
+                        プラス1/10で建築可能
+                    </td>
+                    <td style="background: #fff; font-size: 0.95em;">
+                        ☆ 建蔽率の最高限度が8/10とされている地域外でかつ防火地域内にある耐火建築物等<br>
+                        or 準防火地域内にある耐火建築物等または準耐火建築物等<br>
+                        → 建築物の敷地が防火地域の内外にわたる場合で、建物が<span class="hidden-text" onclick="reveal(this)">耐火建築物</span>等であるときは、その敷地は<span class="hidden-text" onclick="reveal(this)">すべて防火地域</span>としてみなされる<br>
+                        → 建物の敷地が<span class="hidden-text" onclick="reveal(this)">準防火地域</span>と<span class="hidden-text" onclick="reveal(this)">防火・準防火地域</span>以外の区域にわたる場合で、建物が耐火建築物等・準耐火建築物等であるときは、その敷地はすべて<span class="hidden-text" onclick="reveal(this)">準防火地域</span>としてみなされる<br>
+                        → 耐火建築物等・準耐火建築物等の「等」は、その建築物と同等以上の<span class="hidden-text" onclick="reveal(this)">延焼防止性能</span>を有する建築物をいう
+                    </td>
+                    <td style="background: #fff; text-align: center; vertical-align: middle;">
+                        <span class="hidden-text" onclick="reveal(this)">不要</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background: #fff; font-weight: bold;">
+                        プラス1/10で建築可能
+                    </td>
+                    <td style="background: #fff;">
+                        ☆ 街区内の角地等にある建築物
+                    </td>
+                    <td style="background: #fff; text-align: center; vertical-align: middle;">
+                        <span class="hidden-text" onclick="reveal(this)">必要</span>
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "集団規定",
+            subcategory: "建蔽率③",
+            title: "建蔽率の緩和に関する基準③",
+            headers: `<tr><th style="width: 30%;">適合すべき基準 (C)</th><th style="width: 50%;">対象の建築物 (D)</th><th style="width: 20%;">特定行政庁の許可 (F)</th></tr>`,
+            rows: [
+                `<tr>
+                    <td style="background: #fff; font-weight: bold;">
+                        許可の範囲内で建蔽率を超えることができる
+                    </td>
+                    <td style="background: #fff; font-size: 0.95em;">
+                        ★<span class="hidden-text" onclick="reveal(this)">隣地境界線</span>から後退して壁面線の指定がある場合、その壁面線の限度を超えない建築物
+                    </td>
+                    <td style="background: #fff; text-align: center; vertical-align: middle;">
+                        <span class="hidden-text" onclick="reveal(this)">必要</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background: #fff; font-weight: bold;">
+                        許可の範囲内で建蔽率を超えることができる
+                    </td>
+                    <td style="background: #fff; font-size: 0.95em;">
+                        ★<span class="hidden-text" onclick="reveal(this)">前面道路</span>の境界線から後退して壁面線を指定した場合、その壁面線を超えない建築物<br>
+                        ※ひさしなど一定のものは壁面線を超えてもよい
+                    </td>
+                    <td style="background: #fff; text-align: center; vertical-align: middle;">
+                        <span class="hidden-text" onclick="reveal(this)">必要</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="background: #fff; font-weight: bold;">
+                        許可の範囲内で建蔽率を超えることができる
+                    </td>
+                    <td style="background: #fff; font-size: 0.95em;">
+                        ★建築物の<span class="hidden-text" onclick="reveal(this)">エネルギー消費性能</span>の向上のため必要な外壁に関する工事その他の屋外に面する建築物の部分に関する工事を行う建築物で構造上やむを得ないものとして国土交通省令で定めるもの
+                    </td>
+                    <td style="background: #fff; text-align: center; vertical-align: middle;">
+                        <span class="hidden-text" onclick="reveal(this)">必要</span>
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "集団規定",
+            subcategory: "容積率①",
+            title: "容積率の制限に関する基準①",
+            headers: `<tr><th style="width: 40%;">原則 (D)</th><th style="width: 60%;">例外 (E)</th></tr>`,
+            rows: [
+                `<tr>
+                    <td class="col-d">
+                        前面道路の幅員が<span class="hidden-text" onclick="reveal(this)">12m以上</span>の場合の容積率<br>
+                        ＝指定容積率
+                    </td>
+                    <td class="col-e">
+                        前面道路の幅員が<span class="hidden-text" onclick="reveal(this)">12m未満</span>の場合の容積率<br>
+                        →次のうち、小さいほう<br>
+                        ①指定容積率<br>
+                        ②前面道路の幅員 × 法定乗数（住居系 → <span class="hidden-text" onclick="reveal(this)">4/10</span> それ以外 → <span class="hidden-text" onclick="reveal(this)">6/10</span>）
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "集団規定",
+            subcategory: "容積率②",
+            title: "容積率の制限に関する基準②",
+            headers: `<tr><th style="width: 40%;">対象の建築物 (D)</th><th style="width: 45%;">適合すべき基準 (E)</th><th style="width: 15%;">特定行政庁の許可 (F)</th></tr>`,
+            rows: [
+                `<tr>
+                    <td class="col-d" style="font-size: 0.9em;">
+                        地下室（天井が地盤面からの高さ<span class="hidden-text" onclick="reveal(this)">1m以下</span>のものに限る）で<span class="hidden-text" onclick="reveal(this)">住宅</span>または<span class="hidden-text" onclick="reveal(this)">老人ホーム</span>等に供する部分の床面積
+                    </td>
+                    <td class="col-e" style="font-size: 0.9em;">
+                        当該建築物の床面積の<span class="hidden-text" onclick="reveal(this)">1/3</span>を限度として延べ面積に算入しない
+                    </td>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <span class="hidden-text" onclick="reveal(this)">不要</span>
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "集団規定",
+            subcategory: "容積率③",
+            title: "容積率の制限に関する基準③",
+            headers: `<tr><th style="width: 45%;">対象の建築物 (D)</th><th style="width: 40%;">適合すべき基準 (E)</th><th style="width: 15%;">特定行政庁の許可 (F)</th></tr>`,
+            rows: [
+                `<tr>
+                    <td class="col-d" style="font-size: 0.85em;">
+                        <span class="hidden-text" onclick="reveal(this)">エレベータ</span>の<span class="hidden-text" onclick="reveal(this)">昇降路</span>の部分の床面積
+                    </td>
+                    <td class="col-e" style="font-size: 0.85em; vertical-align: middle;" rowspan="3">
+                        延べ面積に算入しない
+                    </td>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <span class="hidden-text" onclick="reveal(this)">不要</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-d" style="font-size: 0.85em;">
+                        共同住宅または老人ホーム等の共用の<span class="hidden-text" onclick="reveal(this)">廊下</span>・<span class="hidden-text" onclick="reveal(this)">階段</span>の床面積
+                    </td>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <span class="hidden-text" onclick="reveal(this)">不要</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-d" style="font-size: 0.85em;">
+                        住宅または老人ホーム等に設ける<span class="hidden-text" onclick="reveal(this)">機械室</span>その他これに類する建築物の部分（給湯設備等の建築設備を設置するためのものであって、市街地の環境を害するおがないものとして<span class="hidden-text" onclick="reveal(this)">国土交通省令</span>で定めるもの）の床面積
+                    </td>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <span class="hidden-text" onclick="reveal(this)">必要</span>
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "集団規定",
+            subcategory: "容積率④",
+            title: "容積率の緩和等に関する基準",
+            headers: `<tr><th style="width: 45%;">対象の建築物 (D)</th><th style="width: 40%;">適合すべき基準 (E)</th><th style="width: 15%;">特定行政庁の許可 (F)</th></tr>`,
+            rows: [
+                `<tr>
+                    <td class="col-d" style="font-size: 0.85em;">
+                        ①同一敷地内の建築物の<span class="hidden-text" onclick="reveal(this)">機械室</span>その他これに類する部分の床面積の合計の建築物の延べ面積に対する割合が<span class="hidden-text" onclick="reveal(this)">著しく大きい</span>場合におけるその敷地内の建築物
+                    </td>
+                    <td class="col-e" style="font-size: 0.85em; vertical-align: middle;" rowspan="3">
+                        その許可の範囲内で容積率の限度が緩和される
+                    </td>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <span class="hidden-text" onclick="reveal(this)">必要</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-d" style="font-size: 0.85em;">
+                        ②その敷地の周囲に広い公園、広場、道路その他の空地を有する建築物
+                    </td>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <span class="hidden-text" onclick="reveal(this)">必要</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-d" style="font-size: 0.85em;">
+                        ③建築物の<span class="hidden-text" onclick="reveal(this)">エネルギー消費性能</span>の向上のため必要な外壁に関する工事その他の屋外に面する建築物の部分に関する工事を行う建築物で構造上やむを得ないものとして<span class="hidden-text" onclick="reveal(this)">国土交通省令</span>で定めるもの
+                    </td>
+                    <td style="text-align: center; vertical-align: middle;">
+                        <span class="hidden-text" onclick="reveal(this)">必要</span>
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "集団規定",
+            subcategory: "敷地面積の最低限度",
+            title: "敷地面積の最低限度に関する基準",
+            headers: `<tr><th style="width: 40%;">内容 (D)</th><th style="width: 60%;">例外・制限 (E)</th></tr>`,
+            rows: [
+                `<tr>
+                    <td class="col-d" style="font-size: 0.9em;">
+                        用途地域に関する都市計画において建築物の敷地の最低限度が定められたときは、その最低限度以上でなければなりません。<br>
+                        ただし、次のいずれかの建築物の敷地については、適用されません。
+                    </td>
+                    <td class="col-e" style="font-size: 0.9em;">
+                        ①建蔽率の最高限度が8/10とされている地域内でかつ防火地域内にある耐火建築物等<br>
+                        ②公衆便所、巡査派出所など公益上必要なもの<br>
+                        ③周囲に広い公園、広場、道路その他の空地を有する建築物であって、特定行政庁が市街地の環境を害するおがないと認めて建築審査会の同意を得て許可したもの<br>
+                        ④特定行政庁が用途上または構造上やむを得ないと認めて建築審査会の同意を得て許可したもの
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="background: #fdfefe; font-size: 0.95em; color: #555;">
+                        ※なお、都市計画において敷地面積の最低限度を定めるときは、その最低限度は<span class="hidden-text" onclick="reveal(this)">200㎡</span>を超えることはできません
+                    </td>
+                </tr>`
+            ]
+        },
+        {
+            category: "集団規定",
+            subcategory: "防火地域・準防火地域",
+            title: "防火地域・準防火地域に関する制限",
+            headers: `<tr><th style="width: 40%;">対象・項目 (D)</th><th style="width: 60%;">基準・内容 (E)</th></tr>`,
+            rows: [
+                `<tr>
+                    <td class="col-d" style="font-size: 0.9em;">
+                        ☆門または塀<br>延焼防止上支障のない構造が必要なもの
+                    </td>
+                    <td class="col-e" style="padding: 0;">
+                        <table style="width: 100%; border: none; margin: 0;">
+                            <tr><th style="width: 30%; border-top: none;">高さ</th><th style="width: 35%; border-top: none;">防火地域</th><th style="width: 35%; border-top: none;">準防火地域</th></tr>
+                            <tr><td>2m超</td><td style="text-align: center;"><span class="hidden-text" onclick="reveal(this)">〇</span></td><td style="text-align: center;"><span class="hidden-text" onclick="reveal(this)">〇</span><br>（<span class="hidden-text" onclick="reveal(this)">木造以外</span>であれば×）</td></tr>
+                            <tr><td>2m以下</td><td style="text-align: center;"><span class="hidden-text" onclick="reveal(this)">×</span></td><td style="text-align: center;"><span class="hidden-text" onclick="reveal(this)">×</span></td></tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-d" style="font-size: 0.9em;">
+                        ☆看板等<br>
+                        <span class="hidden-text" onclick="reveal(this)">防火地域</span>内にある<span class="hidden-text" onclick="reveal(this)">看板</span>、<span class="hidden-text" onclick="reveal(this)">広告塔</span>、装飾塔等で<br>
+                        1. 建築物の<span class="hidden-text" onclick="reveal(this)">屋上</span>に設けるもの<br>
+                        2. 高さが<span class="hidden-text" onclick="reveal(this)">3m超</span>のもの<br>
+                        は、その主要部分を<span class="hidden-text" onclick="reveal(this)">不燃材料</span>で造り、または覆わなければなりません。
+                    </td>
+                    <td class="col-e" style="font-size: 0.9em; vertical-align: middle;">
+                        ☆外壁<br>
+                        <span class="hidden-text" onclick="reveal(this)">防火地域または準防火地域</span>にある建築物で、外壁が<span class="hidden-text" onclick="reveal(this)">耐火構造</span>のものは、その外壁を隣地境界線に接して設けることができる
+                    </td>
+                </tr>`
+            ]
+        }
+    ];
+
+    let questions = [];
+    let incorrectQuestions = [];
+    let currentIndex = 0;
+    let correctScore = 0;
+    let isReviewMode = false;
+
+    function shuffleArray(array) {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function startApp() {
+        const selectedMode = document.querySelector('input[name="playMode"]:checked').value;
+        
+        let freshQuestions = rawQuestions.map(q => ({
+            ...q,
+            rows: [...q.rows],
+            revealedIndices: new Set(),
+            autoRevealedIndices: new Set()
+        }));
+
+        if (selectedMode === 'random') {
+            questions = shuffleArray(freshQuestions);
+        } else {
+            questions = [...freshQuestions];
+        }
+        
+        incorrectQuestions = [];
+        currentIndex = 0;
+        correctScore = 0;
+        isReviewMode = false;
+
+        renderQuizContainer();
+        loadQuestion();
+    }
+
+    function renderQuizContainer() {
+        document.getElementById('app-container').innerHTML = `
+            <div class="header">
+                <span class="badge-category" id="category-badge"></span>
+                <span class="badge-subcategory" id="subcategory-badge"></span>
+                <h2 id="title-text"></h2>
+                <div class="score-board"><span id="mode-label">問題</span> <span id="current-num">1</span> / <span id="total-count">17</span> | 正解数: <span id="correct-count">0</span></div>
+            </div>
+            <table>
+                <thead id="table-head"></thead>
+                <tbody id="table-body"></tbody>
+            </table>
+            <div style="padding: 20px; background: #fafafa; border-top: 1px solid #ddd; text-align: center;">
+                <div class="button-container" id="action-buttons">
+                    <button class="btn btn-incorrect" onclick="judge(false)">不正解</button>
+                    <button class="btn btn-correct" onclick="judge(true)">正解</button>
+                </div>
+                <div id="overall-result" style="margin-top: 10px; font-weight: bold; font-size: 14px;"></div>
+            </div>
+        `;
+    }
+
+    function loadQuestion() {
+        const q = questions[currentIndex];
+        document.getElementById('category-badge').textContent = q.category;
+        document.getElementById('subcategory-badge').textContent = q.subcategory;
+        document.getElementById('title-text').textContent = q.title;
+        document.getElementById('table-head').innerHTML = q.headers;
+        document.getElementById('current-num').textContent = currentIndex + 1;
+        document.getElementById('total-count').textContent = questions.length;
+        document.getElementById('correct-count').textContent = correctScore;
+        document.getElementById('mode-label').textContent = isReviewMode ? '復習問題' : '問題';
+        
+        document.getElementById('table-body').innerHTML = q.rows.join('');
+        
+        const hiddenElements = document.querySelectorAll('#table-body .hidden-text');
+        hiddenElements.forEach((el, index) => {
+            if (!isReviewMode) {
+                if (q.revealedIndices.has(index)) {
+                    el.classList.add('revealed');
+                }
+            } else {
+                if (q.revealedIndices.has(index) && !q.autoRevealedIndices.has(index)) {
+                    el.classList.add('revealed');
+                }
+            }
+
+            el.onclick = function() {
+                reveal(this, index);
+            };
+        });
+
+        document.getElementById('overall-result').textContent = '';
+        
+        // ★修正点：問題を読み込むときは必ず「正解」「不正解」ボタンの状態にリセットする
+        document.getElementById('action-buttons').innerHTML = `
+            <button class="btn btn-incorrect" onclick="judge(false)">不正解</button>
+            <button class="btn btn-correct" onclick="judge(true)">正解</button>
+        `;
+        document.getElementById('action-buttons').style.display = 'flex';
+    }
+
+    function reveal(element, index) {
+        element.classList.toggle('revealed');
+        const q = questions[currentIndex];
+        if (element.classList.contains('revealed')) {
+            q.revealedIndices.add(index);
+            q.autoRevealedIndices.delete(index);
+            element.classList.remove('auto-revealed');
+        } else {
+            q.revealedIndices.delete(index);
+            q.autoRevealedIndices.delete(index);
+            element.classList.remove('auto-revealed');
+        }
+    }
+
+    function judge(isCorrect) {
+        const resultElem = document.getElementById('overall-result');
+        const currentQ = questions[currentIndex];
+        const hiddenElements = document.querySelectorAll('#table-body .hidden-text');
+        
+        if (isCorrect) {
+            correctScore++;
+            document.getElementById('correct-count').textContent = correctScore;
+            resultElem.style.color = '#2ecc71';
+            resultElem.textContent = '正解！次の問題に進みます...';
+            
+            document.getElementById('action-buttons').style.display = 'none';
+            setTimeout(nextStep, 1000);
+        } else {
+            resultElem.style.color = '#e74c3c';
+            resultElem.textContent = '不正解。答えを確認して、見直したら「次の問題へ」を押してください。';
+            
+            // 不正解のとき：まだ開いていないところをすべて自動で開く
+            hiddenElements.forEach((el, index) => {
+                if (!el.classList.contains('revealed')) {
+                    el.classList.add('revealed', 'auto-revealed');
+                    currentQ.revealedIndices.add(index);
+                    currentQ.autoRevealedIndices.add(index);
+                }
+            });
+
+            if (!incorrectQuestions.includes(currentQ)) {
+                incorrectQuestions.push(currentQ);
+            }
+
+            // ボタンを「次の問題へ」に切り替える
+            document.getElementById('action-buttons').innerHTML = `
+                <button class="btn btn-next" onclick="nextStep()">次の問題へ ➔</button>
+            `;
+        }
+    }
+
+    function nextStep() {
+        currentIndex++;
+        if (currentIndex < questions.length) {
+            loadQuestion();
+        } else {
+            if (!isReviewMode && incorrectQuestions.length > 0) {
+                document.getElementById('app-container').innerHTML = `
+                    <div class="header" style="justify-content: center;">
+                        <h2>お疲れ様でした！一通り終了しました 🎉</h2>
+                    </div>
+                    <div style="padding: 40px; text-align: center;">
+                        <p style="font-size: 18px; margin-bottom: 10px;">正解数: <strong>${correctScore} / ${rawQuestions.length}</strong></p>
+                        <p style="font-size: 16px; color: #e74c3c; margin-bottom: 20px;">間違えた問題（${incorrectQuestions.length}問）の復習を行います！</p>
+                        <button class="btn btn-correct" onclick="startReviewMode()">間違えた問題を復習する</button>
+                    </div>
+                `;
+            } else {
+                document.getElementById('app-container').innerHTML = `
+                    <div class="header" style="justify-content: center;">
+                        <h2>お疲れ様でした！すべての学習が完了しました 🎉</h2>
+                    </div>
+                    <div style="padding: 40px; text-align: center;">
+                        <p style="font-size: 18px; margin-bottom: 20px;">お見事です！バッチリマスターできましたね！</p>
+                        <button class="btn btn-correct" onclick="location.reload()">最初に戻る</button>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    function startReviewMode() {
+        renderQuizContainer();
+        questions = shuffleArray(incorrectQuestions);
+        incorrectQuestions = [];
+        currentIndex = 0;
+        isReviewMode = true;
+        loadQuestion();
+    }
+</script>
+</body>
+</html>
